@@ -1,547 +1,901 @@
 <!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>찾았다! 에어컨 명당</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <html lang="ko" class="dark">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>찾았다! 에어컨 명당 ❄️</title>
+    <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts (Noto Sans KR) -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Noto Sans KR', 'sans-serif'],
+          },
+          colors: {
+            darkbg: '#090d16',
+            darkcard: '#131c2e',
+            darkborder: '#212f48'
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    :root {
-      --bg-primary: #0f172a;
-      --bg-card: rgba(30, 41, 59, 0.75);
-      --bg-card-border: rgba(255, 255, 255, 0.12);
-      --accent-blue: #38bdf8;
-      --accent-green: #4ade80;
-      --accent-yellow: #facc15;
-      --accent-red: #f87171;
-      --text-main: #f8fafc;
-      --text-sub: #94a3b8;
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090d16;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #212f48;
+      border-radius: 4px;
+    }
+    
+    /* Hover Animation */
+    .seat-card {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .seat-card:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 10px 25px -5px rgba(56, 189, 248, 0.3);
+      z-index: 20;
+    }
+    
+    /* Glow Effects */
+    .pulse-glow {
+      animation: pulseGlow 2.5s infinite ease-in-out;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 1; filter: drop-shadow(0 0 15px rgba(56,189,248,0.4)); }
+      50% { opacity: 0.6; filter: drop-shadow(0 0 5px rgba(56,189,248,0.1)); }
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-      user-select: none;
-      -webkit-user-select: none;
+    .tap-ripple {
+      animation: tapPulse 2s infinite ease-in-out;
+    }
+    @keyframes tapPulse {
+      0%, 100% { transform: scale(0.98); opacity: 0.85; }
+      50% { transform: scale(1.04); opacity: 1; }
     }
 
-    body {
-      background-color: var(--bg-primary);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow-x: hidden;
+    .glass-card {
+      background: rgba(19, 28, 46, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
-
-    .app-container {
-      width: 100%;
-      max-width: 480px;
-      min-height: 100vh;
-      background: #0f172a;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
-    }
-
-    .screen {
-      display: none;
-      flex-direction: column;
-      flex: 1;
-      padding: 24px;
-      opacity: 0;
-      transition: opacity 0.3s ease-in-out;
-    }
-
-    .screen.active {
-      display: flex;
-      opacity: 1;
-    }
-
-    /* 1. 스플래시 화면 */
-    #screen-splash {
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      cursor: pointer;
-      background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
-    }
-
-    .splash-icon {
-      font-size: 80px;
-      color: var(--accent-blue);
-      margin-bottom: 20px;
-      animation: pulse 2s infinite ease-in-out;
-      filter: drop-shadow(0 0 18px rgba(56, 189, 248, 0.6));
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 0.85; }
-      50% { transform: scale(1.08); opacity: 1; }
-    }
-
-    .splash-title {
-      font-size: 32px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      margin-bottom: 12px;
-      background: linear-gradient(135deg, #38bdf8, #818cf8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .splash-subtitle {
-      font-size: 15px;
-      color: var(--text-sub);
-      margin-bottom: 40px;
-    }
-
-    .touch-prompt {
-      font-size: 14px;
-      color: var(--accent-blue);
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      padding: 12px 24px;
-      border-radius: 30px;
-      background: rgba(56, 189, 248, 0.12);
-      animation: blink 1.5s infinite;
-    }
-
-    @keyframes blink {
-      0%, 100% { opacity: 0.4; }
-      50% { opacity: 1; }
-    }
-
-    /* 2. 설정 화면 */
-    .section-title {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 20px;
-      color: var(--accent-blue);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .form-group {
-      margin-bottom: 18px;
-    }
-
-    .form-label {
-      display: block;
-      font-size: 14px;
-      color: var(--text-sub);
-      margin-bottom: 8px;
-    }
-
-    .input-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-
-    .btn-option {
-      background: var(--bg-card);
-      border: 1px solid var(--bg-card-border);
-      color: var(--text-main);
-      padding: 12px;
-      border-radius: 10px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: center;
-    }
-
-    .btn-option.active {
-      border-color: var(--accent-blue);
-      background: rgba(56, 189, 248, 0.2);
-      color: var(--accent-blue);
-      font-weight: bold;
-    }
-
-    select, input[type="number"] {
-      width: 100%;
-      background: var(--bg-card);
-      border: 1px solid var(--bg-card-border);
-      color: var(--text-main);
-      padding: 12px;
-      border-radius: 10px;
-      font-size: 14px;
-      outline: none;
-    }
-
-    .nav-btns {
-      display: flex;
-      gap: 10px;
-      margin-top: 15px;
-      padding-top: 10px;
-    }
-
-    .btn-primary {
-      flex: 1;
-      background: var(--accent-blue);
-      color: #0f172a;
-      border: none;
-      padding: 14px;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.1);
-      color: var(--text-main);
-      border: none;
-      padding: 14px 20px;
-      border-radius: 12px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    /* 3. 결과 화면 */
-    .classroom-map {
-      background: rgba(15, 23, 42, 0.85);
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .board {
-      background: #1e3a29;
-      color: #a7f3d0;
-      text-align: center;
-      padding: 8px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: bold;
-      border: 1px solid #065f46;
-    }
-
-    .ac-indicator {
-      background: rgba(56, 189, 248, 0.2);
-      border: 1px dashed var(--accent-blue);
-      color: var(--accent-blue);
-      text-align: center;
-      padding: 6px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    .desk-grid {
-      display: grid;
-      gap: 8px;
-      margin: 10px 0;
-    }
-
-    .desk-cell {
-      aspect-ratio: 1.2;
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: transform 0.1s;
-      padding: 2px;
-      text-align: center;
-    }
-
-    .desk-cell:active {
-      transform: scale(0.95);
-    }
-
-    .desk-best { background: rgba(74, 222, 128, 0.25); border: 1.5px solid var(--accent-green); color: var(--accent-green); }
-    .desk-cold { background: rgba(56, 189, 248, 0.25); border: 1.5px solid var(--accent-blue); color: var(--accent-blue); }
-    .desk-hot { background: rgba(248, 113, 113, 0.25); border: 1.5px solid var(--accent-red); color: var(--accent-red); }
-    .desk-warm { background: rgba(250, 204, 21, 0.25); border: 1.5px solid var(--accent-yellow); color: var(--accent-yellow); }
-
-    .legend-box {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      font-size: 12px;
-      margin-bottom: 20px;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .legend-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
-
-    .modal-overlay {
-      display: none;
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(4px);
-      z-index: 100;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-
-    .modal-card {
-      background: #1e293b;
-      border: 1px solid var(--bg-card-border);
-      border-radius: 16px;
-      padding: 20px;
-      width: 100%;
-      max-width: 320px;
-      text-align: center;
-    }
-
-    .modal-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
-    .modal-desc { font-size: 14px; color: var(--text-sub); margin-bottom: 20px; line-height: 1.4; }
   </style>
 </head>
-<body>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white">
 
-  <div class="app-container">
+  <!-- 1. FULLSCREEN TOUCH SPLASH SCREEN -->
+  <div id="splash-screen" onclick="startApp()" class="fixed inset-0 z-50 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex flex-col items-center justify-between p-6 cursor-pointer select-none overflow-hidden">
     
-    <!-- 1. 스플래시 화면 -->
-    <div class="screen active" id="screen-splash" onclick="goToSetup()">
-      <div class="splash-icon">
-        <i class="fa-solid fa-snowflake"></i>
-      </div>
-      <div class="splash-title">찾았다! 에어컨 명당</div>
-      <div class="splash-subtitle">우리 반 최고의 쾌적한 자리를 찾아보세요</div>
-      <div class="touch-prompt">화면 아무 곳이나 터치하여 시작</div>
+    <!-- Background Particles FX -->
+    <div class="absolute inset-0 opacity-20 pointer-events-none">
+      <i class="fa-solid fa-snowflake absolute top-10 left-10 text-sky-400 text-3xl animate-bounce" style="animation-duration: 4s;"></i>
+      <i class="fa-solid fa-snowflake absolute top-1/4 right-12 text-blue-300 text-2xl animate-pulse" style="animation-duration: 3s;"></i>
+      <i class="fa-solid fa-wind absolute bottom-20 left-16 text-cyan-300 text-4xl opacity-50"></i>
+      <i class="fa-solid fa-snowflake absolute bottom-1/3 right-1/4 text-sky-200 text-xl animate-bounce" style="animation-duration: 5s;"></i>
     </div>
 
-    <!-- 2. 환경 설정 화면 -->
-    <div class="screen" id="screen-setup">
-      <div class="section-title"><i class="fa-solid fa-sliders"></i> 교실 및 에어컨 설정</div>
+    <div></div>
 
-      <div class="form-group">
-        <label class="form-label">가로 줄 수 (열)</label>
-        <input type="number" id="input-cols" value="4" min="2" max="8">
+    <!-- Center Hero Title -->
+    <div class="text-center space-y-6 max-w-lg z-10">
+      <div class="inline-block relative">
+        <div class="w-28 h-28 sm:w-36 sm:h-36 bg-gradient-to-tr from-sky-500 via-cyan-400 to-indigo-600 rounded-3xl p-0.5 shadow-2xl shadow-sky-500/30 pulse-glow flex items-center justify-center mx-auto">
+          <div class="w-full h-full bg-slate-950 rounded-[22px] flex items-center justify-center">
+            <i class="fa-solid fa-snowflake text-5xl sm:text-6xl text-sky-400"></i>
+          </div>
+        </div>
+        <span class="absolute -top-2 -right-2 bg-sky-500 text-slate-950 text-xs font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-md">
+          v3.0
+        </span>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">세로 줄 수 (행)</label>
-        <input type="number" id="input-rows" value="5" min="2" max="8">
+      <div class="space-y-2">
+        <h1 class="text-4xl sm:text-5xl font-black tracking-tight text-white drop-shadow-md">
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-cyan-300 to-blue-400">찾았다! 에어컨 명당</span> ❄️
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-400 font-medium max-w-xs mx-auto leading-relaxed">
+          에어컨 온도와 바람 세기까지 정밀하게 계산하는 스마트 교실 자리 분석 앱
+        </p>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">책상 배치 방식</label>
-        <div class="input-grid">
-          <button class="btn-option active" id="btn-pair-single" onclick="setPair(false)">1인석 (독서실형)</button>
-          <button class="btn-option" id="btn-pair-double" onclick="setPair(true)">2인석 (짝꿍형)</button>
+      <!-- Touch Prompt Indicator -->
+      <div class="pt-6">
+        <div class="inline-flex items-center gap-3 bg-slate-900 border border-sky-500/40 text-sky-300 text-sm font-bold px-6 py-3.5 rounded-full shadow-xl backdrop-blur-md tap-ripple">
+          <i class="fa-solid fa-hand-pointer text-sky-400 text-lg"></i>
+          <span>화면 아무 곳이나 터치하여 시작하기</span>
         </div>
       </div>
+    </div>
 
-      <div class="form-group">
-        <label class="form-label">창문 위치</label>
-        <div class="input-grid">
-          <button class="btn-option active" id="btn-win-left" onclick="setWindow('left')">왼쪽</button>
-          <button class="btn-option" id="btn-win-right" onclick="setWindow('right')">오른쪽</button>
+    <div class="text-slate-500 text-xs font-medium z-10 pb-2">
+      중학생을 위한 교실 맞춤형 에어컨 자리 네비게이터 🏫
+    </div>
+  </div>
+
+
+  <!-- MAIN APP CONTAINER -->
+  <div id="main-app" class="hidden min-h-screen flex flex-col justify-between">
+
+    <!-- Navigation Header -->
+    <header class="bg-slate-900/90 border-b border-slate-800 backdrop-blur-md sticky top-0 z-30 shadow-md">
+      <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="resetToSplash()">
+          <div class="bg-sky-500/10 border border-sky-500/30 p-2 rounded-xl">
+            <i class="fa-solid fa-snowflake text-xl text-sky-400"></i>
+          </div>
+          <div>
+            <h1 class="font-black text-base sm:text-lg tracking-tight leading-none text-white">찾았다! 에어컨 명당</h1>
+            <p class="text-[11px] text-slate-400 font-medium mt-0.5">스마트 교실 온도 & 명당 분석기 🏫</p>
+          </div>
+        </div>
+        <button id="reconfig-btn" onclick="showConfigModal()" class="hidden bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs sm:text-sm font-semibold px-3.5 py-1.5 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-sliders"></i>
+          <span>설정 변경</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 py-6 w-full flex-grow">
+
+      <!-- STEP 1: Form Setup Screen -->
+      <section id="setup-section" class="glass-card rounded-2xl shadow-2xl p-5 sm:p-8 max-w-2xl mx-auto transition-all">
+        <div class="text-center mb-6">
+          <span class="inline-block bg-sky-500/10 text-sky-400 border border-sky-500/20 font-bold text-xs px-3 py-1 rounded-full mb-2">
+            Step 1. 우리 반 조건 설정
+          </span>
+          <h2 class="text-2xl font-bold text-white">우리 반 상태를 정해줘!</h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">에어컨 설정 온도와 바람 세기에 맞게 명당을 정밀하게 계산해줄게.</p>
+        </div>
+
+        <form id="config-form" onsubmit="handleFormSubmit(event)" class="space-y-6">
+          
+          <!-- Quick Presets -->
+          <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+            <label class="block text-xs font-bold text-slate-400 mb-2">⚡ 프리셋으로 빠르게 정하기</label>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <button type="button" onclick="applyPreset('standard')" class="text-xs font-semibold py-2 px-3 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-sky-300 border border-slate-800 hover:border-sky-500/50 rounded-lg transition shadow-sm flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-school text-sky-400"></i> 일반 중학교 (6×6)
+              </button>
+              <button type="button" onclick="applyPreset('pair')" class="text-xs font-semibold py-2 px-3 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-sky-300 border border-slate-800 hover:border-sky-500/50 rounded-lg transition shadow-sm flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-user-group text-indigo-400"></i> 2인 1짝 배치
+              </button>
+              <button type="button" onclick="applyPreset('large')" class="text-xs font-semibold py-2 px-3 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-sky-300 border border-slate-800 hover:border-sky-500/50 rounded-lg transition shadow-sm flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-users text-teal-400"></i> 대형 교실 (6×8)
+              </button>
+            </div>
+          </div>
+
+          <!-- Section 1: Dimensions -->
+          <div class="space-y-4">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-sky-400 flex items-center gap-1.5 border-b border-slate-800 pb-2">
+              <i class="fa-solid fa-border-all"></i> 1. 교실 책상 구조
+            </h3>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="input-rows" class="block text-xs sm:text-sm font-bold text-slate-300 mb-1.5">
+                  <i class="fa-solid fa-arrows-up-down text-sky-400 mr-1"></i> 세로 줄 수 (행)
+                </label>
+                <select id="input-rows" class="w-full bg-slate-950 border border-slate-800 text-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-sky-500 font-medium">
+                  <option value="4">4줄 (소형)</option>
+                  <option value="5" selected>5줄 (보통)</option>
+                  <option value="6">6줄 (일반 중학교)</option>
+                  <option value="7">7줄 (대형)</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="input-cols" class="block text-xs sm:text-sm font-bold text-slate-300 mb-1.5">
+                  <i class="fa-solid fa-arrows-left-right text-sky-400 mr-1"></i> 가로 총 책상 수 (열)
+                </label>
+                <select id="input-cols" class="w-full bg-slate-950 border border-slate-800 text-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-sky-500 font-medium">
+                  <option value="4">4개 책상</option>
+                  <option value="5">5개 책상</option>
+                  <option value="6" selected>6개 책상</option>
+                  <option value="8">8개 책상</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="input-style" class="block text-xs sm:text-sm font-bold text-slate-300 mb-1.5">
+                  <i class="fa-solid fa-chair text-sky-400 mr-1"></i> 책상 형태
+                </label>
+                <select id="input-style" class="w-full bg-slate-950 border border-slate-800 text-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-sky-500 font-medium">
+                  <option value="pair" selected>짝꿍과 함께 (2인 1조)</option>
+                  <option value="single">혼자 앉기 (1인 단독)</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="input-groups" class="block text-xs sm:text-sm font-bold text-slate-300 mb-1.5">
+                  <i class="fa-solid fa-table-columns text-sky-400 mr-1"></i> 분단 수 (책상 모둠/통로)
+                </label>
+                <select id="input-groups" class="w-full bg-slate-950 border border-slate-800 text-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-sky-500 font-medium">
+                  <option value="2">2분단 구조</option>
+                  <option value="3" selected>3분단 구조 (일반적)</option>
+                  <option value="4">4분단 구조</option>
+                  <option value="1">분단 나누지 않음</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: AC Settings -->
+          <div class="space-y-4 pt-2">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5 border-b border-slate-800 pb-2">
+              <i class="fa-solid fa-temperature-arrow-down"></i> 2. 에어컨 설정 (온도 & 바람 세기)
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- AC Temperature Slider -->
+              <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                <div class="flex justify-between items-center mb-1">
+                  <label for="input-temp" class="text-xs sm:text-sm font-bold text-slate-300">
+                    <i class="fa-solid fa-temperature-three-quarters text-sky-400 mr-1"></i> 설정 온도
+                  </label>
+                  <span id="temp-display" class="text-sm font-black text-sky-400 bg-sky-950/80 px-2.5 py-0.5 rounded-md border border-sky-500/30">22°C</span>
+                </div>
+                <input type="range" id="input-temp" min="18" max="28" value="22" step="1" oninput="updateTempDisplay(this.value)" class="w-full accent-sky-400 bg-slate-800 rounded-lg cursor-pointer h-2 mt-2">
+                <div class="flex justify-between text-[10px] text-slate-500 font-bold mt-1">
+                  <span>18°C (강력 냉방)</span>
+                  <span>22°C (보통)</span>
+                  <span>28°C (약한 냉방)</span>
+                </div>
+              </div>
+
+              <!-- AC Fan Speed -->
+              <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                <label for="input-wind" class="block text-xs sm:text-sm font-bold text-slate-300 mb-1.5">
+                  <i class="fa-solid fa-wind text-cyan-400 mr-1"></i> 바람 세기 (풍량)
+                </label>
+                <select id="input-wind" class="w-full bg-slate-900 border border-slate-800 text-slate-200 text-sm rounded-xl p-2 focus:ring-2 focus:ring-cyan-500 font-medium">
+                  <option value="weak">약풍 (바람 약함 - 가까이만 닿음)</option>
+                  <option value="medium" selected>중풍 (보통 - 일반 가동)</option>
+                  <option value="strong">강풍 (바람 셈 - 교실 먼 뒤까지 뻗음)</option>
+                  <option value="auto">자동 풍량</option>
+                </select>
+                <p class="text-[10px] text-slate-500 mt-1 font-medium">* 바람이 세질수록 도달 거리가 멀어져 3~5번째 줄이 더 추워집니다!</p>
+              </div>
+            </div>
+
+            <!-- AC Type & Location -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="input-ac-type" class="block text-xs sm:text-sm font-bold text-slate-300 mb-1.5">
+                  <i class="fa-solid fa-fan text-sky-400 mr-1"></i> 에어컨 종류 및 위치
+                </label>
+                <select id="input-ac-type" class="w-full bg-slate-950 border border-slate-800 text-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-sky-500 font-medium">
+                  <option value="ceiling-4way" selected>천장형 4way 시스템 에어컨 (중앙)</option>
+                  <option value="ceiling-2way">천장형 2way 에어컨 (중앙 2방향)</option>
+                  <option value="front-wall">칠판 위/옆 스탠드·벽걸이 에어컨</option>
+                  <option value="back-wall">교실 뒤쪽 벽걸이 에어컨</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="input-window" class="block text-xs sm:text-sm font-bold text-slate-300 mb-1.5">
+                  <i class="fa-solid fa-sun text-amber-400 mr-1"></i> 창문/복도 위치
+                </label>
+                <select id="input-window" class="w-full bg-slate-950 border border-slate-800 text-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-sky-500 font-medium">
+                  <option value="left" selected>창문: 왼쪽 / 복도: 오른쪽</option>
+                  <option value="right">창문: 오른쪽 / 복도: 왼쪽</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="w-full bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-slate-950 font-black py-3.5 px-4 rounded-xl shadow-lg shadow-sky-500/25 transition-all transform active:scale-[0.99] flex items-center justify-center gap-2 text-base">
+            <i class="fa-solid fa-magnifying-glass-location text-lg"></i>
+            <span>찾았다! 에어컨 명당 분석하기!</span>
+          </button>
+
+        </form>
+      </section>
+
+      <!-- STEP 2: Classroom Map Screen -->
+      <section id="result-section" class="hidden space-y-6">
+
+        <!-- Environment Status Header -->
+        <div class="glass-card p-4 sm:p-5 rounded-2xl border border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 text-xl shrink-0">
+              <i class="fa-solid fa-sliders"></i>
+            </div>
+            <div>
+              <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                <span>현재 교실 분석 조건</span>
+                <span id="summary-temp-badge" class="bg-sky-500/20 text-sky-300 text-xs px-2.5 py-0.5 rounded-full font-extrabold border border-sky-500/30">22°C (중풍)</span>
+              </h2>
+              <p id="summary-desc" class="text-xs text-slate-400">6줄 6열 / 천장형 4Way / 창문 왼쪽</p>
+            </div>
+          </div>
+
+          <!-- Summary Stats Counters -->
+          <div class="flex items-center gap-2 sm:gap-3 text-xs w-full md:w-auto justify-between md:justify-end">
+            <div class="bg-emerald-950/60 border border-emerald-500/30 px-3 py-1.5 rounded-xl text-emerald-300 text-center flex-1 md:flex-initial">
+              <p class="text-[10px] text-emerald-400/80 font-bold">★ 명당 자리</p>
+              <p id="stat-best-count" class="text-base font-black">0석</p>
+            </div>
+            <div class="bg-sky-950/60 border border-sky-500/30 px-3 py-1.5 rounded-xl text-sky-300 text-center flex-1 md:flex-initial">
+              <p class="text-[10px] text-sky-400/80 font-bold">🥶 추움 (직풍)</p>
+              <p id="stat-cold-count" class="text-base font-black">0석</p>
+            </div>
+            <div class="bg-amber-950/60 border border-amber-500/30 px-3 py-1.5 rounded-xl text-amber-300 text-center flex-1 md:flex-initial">
+              <p class="text-[10px] text-amber-400/80 font-bold">🔥/🌤️ 더움·미지근</p>
+              <p id="stat-warm-count" class="text-base font-black">0석</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Legend Box & Tip Card -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          <div class="glass-card p-4 rounded-2xl border border-slate-800 md:col-span-2 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-bold text-slate-200 text-xs sm:text-sm flex items-center gap-2">
+                <i class="fa-solid fa-palette text-sky-400"></i> 체감 온도 범례
+              </h3>
+              <span class="text-[11px] text-slate-400">자리 클릭 시 상세 정보 팝업</span>
+            </div>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-semibold">
+              <div class="flex items-center gap-2 bg-emerald-950/60 text-emerald-300 p-2 rounded-lg border border-emerald-500/30">
+                <span class="w-3.5 h-3.5 rounded-full bg-emerald-400 shrink-0 shadow-sm shadow-emerald-400/50"></span>
+                <div>
+                  <p class="font-bold">★최적 명당★</p>
+                  <p class="text-[10px] text-emerald-400/80 font-normal">적당하고 쾌적함</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 bg-sky-950/60 text-sky-300 p-2 rounded-lg border border-sky-500/30">
+                <span class="w-3.5 h-3.5 rounded-full bg-sky-400 shrink-0 shadow-sm shadow-sky-400/50"></span>
+                <div>
+                  <p class="font-bold">추움 (직풍)</p>
+                  <p class="text-[10px] text-sky-400/80 font-normal">바람 직접 받음</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 bg-amber-950/60 text-amber-300 p-2 rounded-lg border border-amber-500/30">
+                <span class="w-3.5 h-3.5 rounded-full bg-amber-400 shrink-0 shadow-sm shadow-amber-400/50"></span>
+                <div>
+                  <p class="font-bold">약간 더움</p>
+                  <p class="text-[10px] text-amber-400/80 font-normal">바람 사각지대</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 bg-rose-950/60 text-rose-300 p-2 rounded-lg border border-rose-500/30">
+                <span class="w-3.5 h-3.5 rounded-full bg-rose-500 shrink-0 shadow-sm shadow-rose-500/50"></span>
+                <div>
+                  <p class="font-bold">더움/햇빛</p>
+                  <p class="text-[10px] text-rose-400/80 font-normal">창가 햇빛 + 열기</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gradient-to-br from-slate-900 to-indigo-950/80 p-4 rounded-2xl border border-indigo-900/50 flex flex-col justify-between">
+            <div>
+              <span class="text-[11px] font-bold text-indigo-400 uppercase tracking-wider block mb-1">
+                <i class="fa-solid fa-atom mr-1"></i> 중3 과학 대류 원리
+              </span>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                에어컨 바람이 세질수록 직풍이 더 멀리까지 닿아 뒤쪽 줄까지 추워질 수 있습니다!
+              </p>
+            </div>
+            <button onclick="toggleScienceModal()" class="text-xs font-bold text-sky-400 hover:text-sky-300 text-left mt-2 flex items-center gap-1">
+              <span>자세한 과학 원리 보기</span>
+              <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Dynamic Classroom Grid Container -->
+        <div class="glass-card p-4 sm:p-6 rounded-2xl shadow-2xl relative overflow-hidden">
+          
+          <!-- Environment Labels -->
+          <div id="window-label" class="absolute top-16 bottom-16 flex items-center justify-center w-6 bg-amber-950/40 text-amber-300 text-[11px] font-bold rounded-md tracking-widest uppercase border border-amber-500/30" style="writing-mode: vertical-rl;">
+            <i class="fa-solid fa-sun mb-2 text-amber-400"></i> 창 문 (햇 빛)
+          </div>
+          <div id="door-label" class="absolute top-16 bottom-16 flex items-center justify-center w-6 bg-slate-800/60 text-slate-400 text-[11px] font-bold rounded-md tracking-widest uppercase border border-slate-700" style="writing-mode: vertical-rl;">
+            <i class="fa-solid fa-door-open mb-2 text-slate-400"></i> 복 도 (복도문)
+          </div>
+
+          <!-- Classroom Layout -->
+          <div class="mx-8 sm:mx-10 space-y-5">
+            
+            <!-- Blackboard Area -->
+            <div class="relative">
+              <div class="w-full bg-emerald-950/80 text-emerald-300 font-bold text-center py-2.5 rounded-lg border border-emerald-700/60 text-sm tracking-wider flex items-center justify-center gap-2 shadow-inner">
+                <i class="fa-solid fa-chalkboard text-emerald-400"></i>
+                <span>칠 판 (교실 앞쪽)</span>
+              </div>
+              
+              <div id="ac-front-indicator" class="hidden my-2 bg-sky-950/80 border border-sky-500/50 text-sky-300 text-xs font-bold py-1 px-3 rounded-full text-center max-w-xs mx-auto flex items-center justify-center gap-2 pulse-glow">
+                <i class="fa-solid fa-fan text-sky-400 animate-spin"></i>
+                <span id="ac-front-text">칠판 위 에어컨 가동 중</span>
+              </div>
+            </div>
+
+            <!-- Dynamic Seat Grid Container -->
+            <div class="overflow-x-auto py-2">
+              <div id="classroom-grid" class="min-w-[320px] mx-auto transition-all">
+                <!-- Seats inserted via JavaScript -->
+              </div>
+            </div>
+
+            <!-- Back Classroom Area -->
+            <div>
+              <div id="ac-back-indicator" class="hidden my-2 bg-sky-950/80 border border-sky-500/50 text-sky-300 text-xs font-bold py-1 px-3 rounded-full text-center max-w-xs mx-auto flex items-center justify-center gap-2 pulse-glow">
+                <i class="fa-solid fa-fan text-sky-400 animate-spin"></i>
+                <span id="ac-back-text">뒤쪽 벽걸이 에어컨 가동 중</span>
+              </div>
+              <div class="w-full bg-slate-800/50 text-slate-400 font-bold text-center py-1.5 rounded-lg text-xs tracking-wider border border-slate-800">
+                교 실 뒤 쪽 (사물함)
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Seat Detail Modal Popup -->
+    <div id="seat-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6 transition-all transform scale-95 opacity-0" id="seat-modal-content">
+        <div class="flex justify-between items-start mb-4">
+          <div class="flex items-center gap-3">
+            <div id="modal-seat-badge" class="w-12 h-12 rounded-xl flex items-center justify-center text-slate-950 font-black text-lg shadow-lg">
+              1-1
+            </div>
+            <div>
+              <h3 id="modal-seat-title" class="text-lg font-bold text-white">자리 위치 정보</h3>
+              <p id="modal-seat-type" class="text-xs font-bold text-sky-400">★ 최적의 명당 자리</p>
+            </div>
+          </div>
+          <button onclick="closeSeatModal()" class="text-slate-500 hover:text-slate-300 p-1">
+            <i class="fa-solid fa-xmark text-xl"></i>
+          </button>
+        </div>
+
+        <div class="space-y-3 text-sm">
+          <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+            <p class="font-bold text-slate-400 text-xs mb-1"><i class="fa-solid fa-temperature-half mr-1 text-sky-400"></i> 예상 체감 온도 느낌</p>
+            <p id="modal-seat-feel" class="text-slate-200 font-semibold">쾌적하고 딱 적당한 시원함</p>
+          </div>
+
+          <div class="bg-sky-950/40 p-3.5 rounded-xl border border-sky-500/20">
+            <p class="font-bold text-sky-400 text-xs mb-1"><i class="fa-solid fa-lightbulb mr-1 text-amber-400"></i> 맞춤 대책 및 생존 팁</p>
+            <p id="modal-seat-tip" class="text-sky-200 leading-relaxed text-xs sm:text-sm">바람이 직접 닿지 않아 수업 집중하기 최적의 자리입니다!</p>
+          </div>
+        </div>
+
+        <div class="mt-5">
+          <button onclick="closeSeatModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl text-sm transition border border-slate-700">
+            확인 완료
+          </button>
         </div>
       </div>
+    </div>
 
-      <div class="form-group">
-        <label class="form-label">에어컨 종류 / 위치</label>
-        <select id="select-ac-type">
-          <option value="ceiling-center">천장형 (교실 중앙)</option>
-          <option value="ceiling-front">천장형 (교실 앞쪽)</option>
-          <option value="stand-front-left">스탠드형 (앞쪽 좌측 구석)</option>
-          <option value="stand-front-right">스탠드형 (앞쪽 우측 구석)</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">에어컨 설정 온도 (°C)</label>
-        <select id="select-ac-temp">
-          <option value="18">18°C ~ 20°C (강한 냉방)</option>
-          <option value="22" selected>21°C ~ 23°C (적정 냉방)</option>
-          <option value="25">24°C ~ 26°C (약한 냉방)</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">바람 세기 (풍량)</label>
-        <div class="input-grid">
-          <button class="btn-option" onclick="setWind('weak', this)">약함</button>
-          <button class="btn-option active" onclick="setWind('medium', this)">보통</button>
-          <button class="btn-option" onclick="setWind('strong', this)" style="grid-column: span 2;">강함 (뒤쪽 줄까지 직풍)</button>
+    <!-- Thermal Science Modal Popup -->
+    <div id="science-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl max-w-lg w-full p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-flask-vial text-sky-400"></i>
+            <span>에어컨 온도·풍량과 대류 현상의 과학</span>
+          </h3>
+          <button onclick="toggleScienceModal()" class="text-slate-500 hover:text-slate-300">
+            <i class="fa-solid fa-xmark text-xl"></i>
+          </button>
         </div>
-      </div>
 
-      <div class="nav-btns">
-        <button class="btn-primary" onclick="generateResult()">명당자리 분석하기 <i class="fa-solid fa-wand-magic-sparkles"></i></button>
+        <div class="space-y-3 text-xs sm:text-sm text-slate-300 leading-relaxed">
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+            <h4 class="font-bold text-sky-400 mb-1">1. 설정 온도와 직풍의 영향</h4>
+            <p>설정 온도가 20°C 이하로 낮을수록 에어컨 토출구에서 나오는 바람의 온도가 매우 낮아져 직풍을 받는 2~3번째 줄은 금방 오한을 느끼게 됩니다.</p>
+          </div>
+
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+            <h4 class="font-bold text-cyan-400 mb-1">2. 바람 세기(풍량)에 따른 사각지대 변화</h4>
+            <p>강풍으로 틀 경우 직풍이 멀리까지 날아가 교실 4~5번째 줄까지 도달하는 반면, 약풍일 때는 에어컨 근처 하강 대류만 발생하여 뒤쪽 자리는 더워집니다.</p>
+          </div>
+
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+            <h4 class="font-bold text-amber-400 mb-1">3. 차가운 공기의 밀도 하강</h4>
+            <p>차가운 공기는 밀도가 높아 바닥과 교실 맨 뒤쪽으로 내려앉는 성질이 있어 맨 뒷줄은 바람을 직접 맞지 않아도 은근히 쌀쌀해질 수 있습니다.</p>
+          </div>
+        </div>
+
+        <button onclick="toggleScienceModal()" class="w-full mt-5 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold py-2.5 rounded-xl text-sm transition">
+          확인
+        </button>
       </div>
     </div>
 
-    <!-- 3. 결과 화면 -->
-    <div class="screen" id="screen-result">
-      <div class="section-title" style="margin-bottom: 12px; color: var(--text-main);">
-        <i class="fa-solid fa-crown" style="color: var(--accent-yellow);"></i> 우리 반 에어컨 명당 지도
-      </div>
-
-      <div class="classroom-map">
-        <div class="board">칠 판 (교실 앞)</div>
-        <div class="ac-indicator" id="ac-position-display">🌀 천장형 에어컨 (중앙)</div>
-        <div class="desk-grid" id="desk-grid"></div>
-      </div>
-
-      <div class="legend-box">
-        <div class="legend-item"><div class="legend-dot" style="background: var(--accent-green);"></div> 초록: 명당 (쾌적)</div>
-        <div class="legend-item"><div class="legend-dot" style="background: var(--accent-blue);"></div> 파랑: 직풍 (추움)</div>
-        <div class="legend-item"><div class="legend-dot" style="background: var(--accent-yellow);"></div> 노랑: 바람 약함</div>
-        <div class="legend-item"><div class="legend-dot" style="background: var(--accent-red);"></div> 빨강: 더움 (햇빛/사각지대)</div>
-      </div>
-
-      <div class="nav-btns">
-        <button class="btn-secondary" onclick="goToSetup()"><i class="fa-solid fa-rotate-left"></i> 다시 설정하기</button>
-      </div>
-    </div>
-
-    <!-- 팝업 모달 -->
-    <div class="modal-overlay" id="modal">
-      <div class="modal-card">
-        <div class="modal-title" id="modal-seat-name">3행 2열 자리</div>
-        <div class="modal-desc" id="modal-seat-desc">설명 내용이 표시됩니다.</div>
-        <button class="btn-primary" style="width: 100%;" onclick="closeModal()">확인</button>
-      </div>
-    </div>
+    <!-- Footer -->
+    <footer class="bg-slate-950 border-t border-slate-900 text-slate-500 text-xs py-4 text-center mt-8">
+      <p>© 2026 찾았다! 에어컨 명당 | 중학생을 위한 스마트 교실 가이드</p>
+    </footer>
 
   </div>
 
   <script>
-    const config = {
+    // App Configuration State
+    let config = {
       rows: 5,
-      cols: 4,
-      isPair: false,
+      cols: 6,
+      style: 'pair',
+      groups: 3,
+      temp: 22,
+      wind: 'medium',
+      acType: 'ceiling-4way',
       windowPos: 'left',
-      acType: 'ceiling-center',
-      acTemp: 22,
-      windSpeed: 'medium'
+      doorPos: 'right'
     };
 
-    function showScreen(screenId) {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById(screenId).classList.add('active');
+    // Splash Screen Transition
+    function startApp() {
+      const splash = document.getElementById('splash-screen');
+      const mainApp = document.getElementById('main-app');
+
+      splash.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+      splash.style.opacity = '0';
+      splash.style.transform = 'scale(1.05)';
+
+      setTimeout(() => {
+        splash.classList.add('hidden');
+        mainApp.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 400);
     }
 
-    function goToSetup() {
-      showScreen('screen-setup');
-    }
-
-    function setPair(val) {
-      config.isPair = val;
-      document.getElementById('btn-pair-single').classList.toggle('active', !val);
-      document.getElementById('btn-pair-double').classList.toggle('active', val);
-    }
-
-    function setWindow(pos) {
-      config.windowPos = pos;
-      document.getElementById('btn-win-left').classList.toggle('active', pos === 'left');
-      document.getElementById('btn-win-right').classList.toggle('active', pos === 'right');
-    }
-
-    function setWind(speed, btn) {
-      config.windSpeed = speed;
-      btn.parentElement.querySelectorAll('.btn-option').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    }
-
-    function generateResult() {
-      config.cols = parseInt(document.getElementById('input-cols').value) || 4;
-      config.rows = parseInt(document.getElementById('input-rows').value) || 5;
-      config.acType = document.getElementById('select-ac-type').value;
-      config.acTemp = parseInt(document.getElementById('select-ac-temp').value);
+    function resetToSplash() {
+      const splash = document.getElementById('splash-screen');
+      const mainApp = document.getElementById('main-app');
       
-      const grid = document.getElementById('desk-grid');
-      grid.innerHTML = '';
-      grid.style.gridTemplateColumns = `repeat(${config.cols}, 1fr)`;
+      splash.style.opacity = '1';
+      splash.style.transform = 'scale(1)';
+      splash.classList.remove('hidden');
+      mainApp.classList.add('hidden');
+    }
 
-      const acDisplay = document.getElementById('ac-position-display');
-      const acMap = {
-        'ceiling-center': '🌀 천장형 에어컨 (교실 중앙)',
-        'ceiling-front': '🌀 천장형 에어컨 (교실 앞쪽)',
-        'stand-front-left': '🧊 스탠드 에어컨 (앞쪽 좌측 구석)',
-        'stand-front-right': '🧊 스탠드 에어컨 (앞쪽 우측 구석)'
-      };
-      acDisplay.innerText = acMap[config.acType];
+    function updateTempDisplay(val) {
+      document.getElementById('temp-display').innerText = `${val}°C`;
+    }
 
-      for (let r = 1; r <= config.rows; r++) {
-        for (let c = 1; c <= config.cols; c++) {
-          const seat = createSeatElement(r, c);
-          grid.appendChild(seat);
+    // Presets
+    function applyPreset(type) {
+      if (type === 'standard') {
+        document.getElementById('input-rows').value = "6";
+        document.getElementById('input-cols').value = "6";
+        document.getElementById('input-style').value = "single";
+        document.getElementById('input-groups').value = "3";
+      } else if (type === 'pair') {
+        document.getElementById('input-rows').value = "5";
+        document.getElementById('input-cols').value = "6";
+        document.getElementById('input-style').value = "pair";
+        document.getElementById('input-groups').value = "3";
+      } else if (type === 'large') {
+        document.getElementById('input-rows').value = "6";
+        document.getElementById('input-cols').value = "8";
+        document.getElementById('input-style').value = "pair";
+        document.getElementById('input-groups').value = "4";
+      }
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      
+      config.rows = parseInt(document.getElementById('input-rows').value);
+      config.cols = parseInt(document.getElementById('input-cols').value);
+      config.style = document.getElementById('input-style').value;
+      config.groups = parseInt(document.getElementById('input-groups').value);
+      config.temp = parseInt(document.getElementById('input-temp').value);
+      config.wind = document.getElementById('input-wind').value;
+      config.acType = document.getElementById('input-ac-type').value;
+      
+      const winVal = document.getElementById('input-window').value;
+      config.windowPos = winVal;
+      config.doorPos = (winVal === 'left') ? 'right' : 'left';
+
+      document.getElementById('setup-section').classList.add('hidden');
+      document.getElementById('result-section').classList.remove('hidden');
+      document.getElementById('reconfig-btn').classList.remove('hidden');
+
+      renderClassroom();
+    }
+
+    function resetToSetup() {
+      document.getElementById('setup-section').classList.remove('hidden');
+      document.getElementById('result-section').classList.add('hidden');
+      document.getElementById('reconfig-btn').classList.add('hidden');
+    }
+
+    function showConfigModal() {
+      resetToSetup();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Thermal Evaluation Algorithm
+    function calculateSeatStatus(r, c) {
+      const totalRows = config.rows;
+      const totalCols = config.cols;
+
+      const isWindowSide = (config.windowPos === 'left' && c < 2) || (config.windowPos === 'right' && c >= totalCols - 2);
+      const isDoorSide = (config.doorPos === 'left' && c === 0) || (config.doorPos === 'right' && c === totalCols - 1);
+
+      let status = 'best'; 
+      let windPowerFactor = config.wind === 'strong' ? 2 : (config.wind === 'weak' ? 0.5 : 1);
+      let isLowTemp = config.temp <= 20;
+      let isHighTemp = config.temp >= 25;
+
+      if (config.acType === 'ceiling-4way') {
+        let directBlastRowStart = 1;
+        let directBlastRowEnd = (windPowerFactor >= 1.5) ? 3 : 2;
+
+        if (r === 0) {
+          status = (isLowTemp) ? 'best' : 'shadow';
+        } else if (r >= directBlastRowStart && r <= directBlastRowEnd) {
+          if (!isWindowSide || isLowTemp) {
+            status = 'freezing';
+          } else {
+            status = 'best'; 
+          }
+        } else if (r > directBlastRowEnd && r < totalRows - 1) {
+          status = isHighTemp ? 'shadow' : 'best';
+        } else if (r === totalRows - 1) {
+          if (windPowerFactor >= 1.5 && !isWindowSide) {
+            status = 'freezing';
+          } else if (isDoorSide) {
+            status = isLowTemp ? 'freezing' : 'best';
+          } else if (isWindowSide) {
+            status = 'hot';
+          } else {
+            status = isHighTemp ? 'shadow' : 'best';
+          }
+        }
+      } 
+      else if (config.acType === 'ceiling-2way') {
+        if (r >= 1 && r <= (windPowerFactor >= 1.5 ? 4 : 2)) {
+          status = 'freezing';
+        } else if (r === 0) {
+          status = 'shadow';
+        } else {
+          status = isHighTemp ? 'shadow' : 'best';
+        }
+      } 
+      else if (config.acType === 'front-wall') {
+        let reach = windPowerFactor >= 1.5 ? 3 : 1;
+        if (r <= reach) {
+          status = 'freezing';
+        } else if (r <= reach + 2) {
+          status = 'best';
+        } else {
+          status = 'shadow';
+        }
+      } 
+      else if (config.acType === 'back-wall') {
+        let reach = windPowerFactor >= 1.5 ? totalRows - 4 : totalRows - 2;
+        if (r >= reach) {
+          status = 'freezing';
+        } else if (r >= reach - 2) {
+          status = 'best';
+        } else {
+          status = 'shadow';
         }
       }
 
-      showScreen('screen-result');
+      if (isWindowSide && (r === 0 || r === totalRows - 1) && !isLowTemp) {
+        status = 'hot';
+      }
+
+      let tempLabel = `${config.temp}°C`;
+      let windText = config.wind === 'strong' ? '강풍' : (config.wind === 'weak' ? '약풍' : '중풍');
+
+      switch (status) {
+        case 'best':
+          return {
+            type: 'best',
+            title: '★ 명당 자리 (골디락스 존)',
+            badgeBg: 'bg-emerald-400 text-slate-950',
+            bgClass: 'bg-emerald-950/60 hover:bg-emerald-900/80 border-emerald-500/50 text-emerald-200',
+            feel: `❄️ 설정 ${tempLabel} / ${windText}: 바람이 직접 오지 않고 딱 쾌적함!`,
+            tip: '바람이 매섭지 않으며 시원한 냉기가 은은하게 퍼지는 명당입니다. 수업 집중하기 최고입니다!'
+          };
+        case 'freezing':
+          return {
+            type: 'freezing',
+            title: '🥶 춥고 직풍이 닿는 자리',
+            badgeBg: 'bg-sky-400 text-slate-950',
+            bgClass: 'bg-sky-950/60 hover:bg-sky-900/80 border-sky-500/50 text-sky-200',
+            feel: `💨 설정 ${tempLabel} / ${windText}: 직풍 투하! 오래 있으면 쌀쌀함.`,
+            tip: '에어컨 바람을 직격으로 받는 위치입니다! 얇은 겉옷이나 체육복을 꼭 챙기세요.'
+          };
+        case 'shadow':
+          return {
+            type: 'shadow',
+            title: '🌤️ 바람 사각지대 (약간 덥거나 꿉꿉)',
+            badgeBg: 'bg-amber-400 text-slate-950',
+            bgClass: 'bg-amber-950/60 hover:bg-amber-900/80 border-amber-500/50 text-amber-200',
+            feel: `🌡️ 설정 ${tempLabel} / ${windText}: 바람이 통하지 않아 약간 답답함.`,
+            tip: '에어컨 바람의 사각지대입니다. 탁상용 미니 선풍기나 부채를 활용해보세요!'
+          };
+        case 'hot':
+          return {
+            type: 'hot',
+            title: '🔥 창가 햇빛 & 더운 자리',
+            badgeBg: 'bg-rose-500 text-white',
+            bgClass: 'bg-rose-950/60 hover:bg-rose-900/80 border-rose-500/50 text-rose-200',
+            feel: `☀️ 설정 ${tempLabel}: 창가 직사광선으로 열기가 높음.`,
+            tip: '창문 햇빛 복사열이 수열되는 자리입니다. 블라인드를 꼭 내리고 시원한 물을 준비하세요!'
+          };
+      }
     }
 
-    function createSeatElement(r, c) {
-      const el = document.createElement('div');
-      el.className = 'desk-cell';
+    function renderClassroom() {
+      const container = document.getElementById('classroom-grid');
+      container.innerHTML = '';
 
-      let score = 'best'; 
-      let label = '명당';
-      let desc = '바람이 은은하게 퍼져 적당하고 쾌적합니다.';
+      let windText = config.wind === 'strong' ? '강풍' : (config.wind === 'weak' ? '약풍' : '중풍');
+      document.getElementById('summary-temp-badge').innerText = `${config.temp}°C (${windText})`;
+      document.getElementById('summary-desc').innerText = `${config.rows}줄 ${config.cols}열 / ${getAcTypeName(config.acType)} / 창문 ${config.windowPos === 'left' ? '왼쪽' : '오른쪽'}`;
 
-      if (config.acType === 'ceiling-center') {
-        if (r === 2 || (config.windSpeed === 'strong' && r === 3)) {
-          score = 'cold'; label = '추움'; desc = '에어컨 바람이 바로 닿는 직풍 자리입니다. 겉옷을 준비하세요.';
-        } else if (r === 1) {
-          score = 'warm'; label = '바람 안 옴'; desc = '에어컨 바로 아래라 바람이 머리 위로 지나갑니다.';
-        } else if (r === config.rows) {
-          score = 'cold'; label = '냉기 누적'; desc = '차가운 공기는 아래로 깔려 맨 뒷줄은 다리가 시릴 수 있습니다.';
-        }
+      const windowLabel = document.getElementById('window-label');
+      const doorLabel = document.getElementById('door-label');
+
+      if (config.windowPos === 'left') {
+        windowLabel.style.left = '0px';
+        windowLabel.style.right = 'auto';
+        doorLabel.style.right = '0px';
+        doorLabel.style.left = 'auto';
       } else {
-        if (r === 1 || r === 2) {
-          score = 'cold'; label = '추움'; desc = '에어컨과 가까워 매우 시원하거나 춥습니다.';
-        } else if (r >= config.rows - 1) {
-          score = 'warm'; label = '약간 더움'; desc = '에어컨과의 거리가 멀어 바람이 약하게 도달합니다.';
+        windowLabel.style.right = '0px';
+        windowLabel.style.left = 'auto';
+        doorLabel.style.left = '0px';
+        doorLabel.style.right = 'auto';
+      }
+
+      const acFrontInd = document.getElementById('ac-front-indicator');
+      const acBackInd = document.getElementById('ac-back-indicator');
+      acFrontInd.classList.toggle('hidden', config.acType !== 'front-wall');
+      acBackInd.classList.toggle('hidden', config.acType !== 'back-wall');
+      
+      if (config.acType === 'front-wall') {
+        document.getElementById('ac-front-text').innerText = `칠판 에어컨 가동 중 (${config.temp}°C / ${windText})`;
+      } else if (config.acType === 'back-wall') {
+        document.getElementById('ac-back-text').innerText = `뒤쪽 에어컨 가동 중 (${config.temp}°C / ${windText})`;
+      }
+
+      const cols = config.cols;
+      const groups = config.groups;
+      
+      const groupGaps = [];
+      if (groups > 1) {
+        const colsPerGroup = Math.floor(cols / groups);
+        for (let g = 1; g < groups; g++) {
+          groupGaps.push(g * colsPerGroup);
         }
       }
 
-      const isWindowSide = (config.windowPos === 'left' && c === 1) || (config.windowPos === 'right' && c === config.cols);
-      if (isWindowSide && score !== 'cold') {
-        score = 'hot'; label = '더움'; desc = '창가 직사광선 복사열 때문에 에어컨 바람이 와도 덥습니다.';
+      let bestCount = 0;
+      let coldCount = 0;
+      let warmCount = 0;
+
+      for (let r = 0; r < config.rows; r++) {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'flex justify-center items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3';
+
+        if ((config.acType === 'ceiling-4way' || config.acType === 'ceiling-2way') && r === 2) {
+          const acRowDiv = document.createElement('div');
+          acRowDiv.className = 'w-full text-center py-1 bg-sky-950/80 border border-sky-500/40 rounded-lg text-sky-300 font-bold text-xs mb-2 flex items-center justify-center gap-2 pulse-glow';
+          acRowDiv.innerHTML = `<i class="fa-solid fa-fan animate-spin text-sky-400"></i> 천장 에어컨 위치 (${config.temp}°C / ${windText})`;
+          container.appendChild(acRowDiv);
+        }
+
+        for (let c = 0; c < cols; c++) {
+          
+          if (groupGaps.includes(c)) {
+            const aisleDiv = document.createElement('div');
+            aisleDiv.className = 'w-3 sm:w-6 flex-shrink-0 text-center text-[10px] text-slate-600 font-bold select-none';
+            aisleDiv.innerText = '통로';
+            rowDiv.appendChild(aisleDiv);
+          }
+
+          const isPairRight = (config.style === 'pair' && c % 2 === 1 && !groupGaps.includes(c + 1) && c < cols - 1);
+          const seatInfo = calculateSeatStatus(r, c);
+
+          if (seatInfo.type === 'best') bestCount++;
+          else if (seatInfo.type === 'freezing') coldCount++;
+          else warmCount++;
+
+          const seatBtn = document.createElement('button');
+          seatBtn.type = 'button';
+          seatBtn.className = `seat-card flex-1 min-w-[42px] max-w-[70px] h-12 sm:h-14 rounded-xl border font-bold p-1 flex flex-col items-center justify-between shadow-sm ${seatInfo.bgClass} ${isPairRight ? 'mr-1 sm:mr-2' : ''}`;
+          
+          seatBtn.onclick = () => openSeatModal(r, c, seatInfo);
+
+          seatBtn.innerHTML = `
+            <span class="text-[10px] opacity-70 font-extrabold">${r + 1}-${c + 1}</span>
+            <span class="text-[11px] sm:text-xs font-black truncate w-full text-center">
+              ${seatInfo.type === 'best' ? '★명당★' : (seatInfo.type === 'freezing' ? '🥶추움' : (seatInfo.type === 'shadow' ? '🌤️미지근' : '🔥더움'))}
+            </span>
+            <i class="fa-solid ${seatInfo.type === 'best' ? 'fa-face-smile' : (seatInfo.type === 'freezing' ? 'fa-snowflake' : 'fa-sun')} text-[10px]"></i>
+          `;
+
+          rowDiv.appendChild(seatBtn);
+        }
+
+        container.appendChild(rowDiv);
       }
 
-      const colorMap = {
-        'best': 'desk-best',
-        'cold': 'desk-cold',
-        'warm': 'desk-warm',
-        'hot': 'desk-hot'
-      };
-
-      el.classList.add(colorMap[score]);
-      el.innerHTML = `${r}-${c}<br>${label}`;
-
-      el.onclick = () => {
-        document.getElementById('modal-seat-name').innerText = `${r}행 ${c}열 자리 (${label})`;
-        document.getElementById('modal-seat-desc').innerText = desc;
-        document.getElementById('modal').style.display = 'flex';
-      };
-
-      return el;
+      document.getElementById('stat-best-count').innerText = `${bestCount}석`;
+      document.getElementById('stat-cold-count').innerText = `${coldCount}석`;
+      document.getElementById('stat-warm-count').innerText = `${warmCount}석`;
     }
 
-    function closeModal() {
-      document.getElementById('modal').style.display = 'none';
+    function getAcTypeName(type) {
+      switch (type) {
+        case 'ceiling-4way': return '천장형 4way';
+        case 'ceiling-2way': return '천장형 2way';
+        case 'front-wall': return '칠판 벽걸이';
+        case 'back-wall': return '뒤쪽 벽걸이';
+        default: return '에어컨';
+      }
+    }
+
+    function openSeatModal(r, c, info) {
+      document.getElementById('modal-seat-badge').innerText = `${r + 1}줄-${c + 1}열`;
+      document.getElementById('modal-seat-badge').className = `w-12 h-12 rounded-xl flex items-center justify-center font-black text-base shadow-lg ${info.badgeBg}`;
+      document.getElementById('modal-seat-title').innerText = `${r + 1}번째 줄 ${c + 1}번째 자리`;
+      document.getElementById('modal-seat-type').innerText = info.title;
+      document.getElementById('modal-seat-feel').innerText = info.feel;
+      document.getElementById('modal-seat-tip').innerText = info.tip;
+
+      const modal = document.getElementById('seat-modal');
+      const modalContent = document.getElementById('seat-modal-content');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modalContent.classList.remove('scale-95', 'opacity-0');
+        modalContent.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+
+    function closeSeatModal() {
+      const modal = document.getElementById('seat-modal');
+      const modalContent = document.getElementById('seat-modal-content');
+      modalContent.classList.remove('scale-100', 'opacity-100');
+      modalContent.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 150);
+    }
+
+    function toggleScienceModal() {
+      const modal = document.getElementById('science-modal');
+      modal.classList.toggle('hidden');
     }
   </script>
 </body>
-</html> 
+</html>
