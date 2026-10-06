@@ -4,306 +4,274 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>찾았다! 에어컨 명당</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
     :root {
-      --bg-main: #0f172a;
-      --bg-card: #1e293b;
-      --bg-input: #334155;
+      --bg-primary: #0f172a;
+      --bg-card: rgba(30, 41, 59, 0.75);
+      --bg-card-border: rgba(255, 255, 255, 0.12);
+      --accent-blue: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-yellow: #facc15;
+      --accent-red: #f87171;
       --text-main: #f8fafc;
       --text-sub: #94a3b8;
-      --accent-blue: #38bdf8;
-      --accent-green: #22c55e;
-      --accent-yellow: #eab308;
-      --accent-red: #ef4444;
-      --border-color: #475569;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
       user-select: none;
+      -webkit-user-select: none;
     }
 
     body {
-      background-color: var(--bg-main);
+      background-color: var(--bg-primary);
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       overflow-x: hidden;
     }
 
-    /* 1. 스플래시 화면 */
-    #splash-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+    .app-container {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      background: #0f172a;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      cursor: pointer;
-      text-align: center;
-      padding: 20px;
-      transition: opacity 0.5s ease, visibility 0.5s;
+      position: relative;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
     }
 
-    #splash-screen.hidden {
+    .screen {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      padding: 24px;
       opacity: 0;
-      visibility: hidden;
+      transition: opacity 0.3s ease-in-out;
     }
 
-    .icon-container {
+    .screen.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    /* 1. 스플래시 화면 */
+    #screen-splash {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+      background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+    }
+
+    .splash-icon {
       font-size: 80px;
+      color: var(--accent-blue);
       margin-bottom: 20px;
       animation: pulse 2s infinite ease-in-out;
+      filter: drop-shadow(0 0 18px rgba(56, 189, 248, 0.6));
     }
 
     @keyframes pulse {
-      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.4)); }
-      50% { transform: scale(1.1); filter: drop-shadow(0 0 25px rgba(56, 189, 248, 0.8)); }
+      0%, 100% { transform: scale(1); opacity: 0.85; }
+      50% { transform: scale(1.08); opacity: 1; }
     }
 
-    .app-title {
-      font-size: 2.5rem;
+    .splash-title {
+      font-size: 32px;
       font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
       background: linear-gradient(135deg, #38bdf8, #818cf8);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 12px;
     }
 
-    .app-subtitle {
-      font-size: 1.1rem;
+    .splash-subtitle {
+      font-size: 15px;
       color: var(--text-sub);
       margin-bottom: 40px;
     }
 
     .touch-prompt {
-      font-size: 0.95rem;
+      font-size: 14px;
       color: var(--accent-blue);
-      border: 1px solid var(--accent-blue);
-      padding: 10px 20px;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      padding: 12px 24px;
       border-radius: 30px;
+      background: rgba(56, 189, 248, 0.12);
       animation: blink 1.5s infinite;
     }
 
     @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
     }
 
-    /* 메인 컨테이너 */
-    .container {
-      width: 100%;
-      max-width: 600px;
-      padding: 20px;
-      display: none;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .container.active {
-      display: flex;
-    }
-
-    header {
-      text-align: center;
-      padding: 10px 0;
-    }
-
-    header h1 {
-      font-size: 1.8rem;
-      color: var(--accent-blue);
-    }
-
-    header p {
-      font-size: 0.9rem;
-      color: var(--text-sub);
-      margin-top: 4px;
-    }
-
-    /* 카드 스타일 */
-    .card {
-      background-color: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-    }
-
-    .card-title {
-      font-size: 1.2rem;
+    /* 2. 설정 화면 */
+    .section-title {
+      font-size: 20px;
       font-weight: 700;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
+      color: var(--accent-blue);
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    /* 폼 요소 */
     .form-group {
-      margin-bottom: 16px;
+      margin-bottom: 18px;
     }
 
-    .form-group:last-child {
-      margin-bottom: 0;
-    }
-
-    label {
+    .form-label {
       display: block;
-      font-size: 0.9rem;
+      font-size: 14px;
       color: var(--text-sub);
       margin-bottom: 8px;
     }
 
-    .inline-inputs {
+    .input-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .btn-option {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-main);
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .btn-option.active {
+      border-color: var(--accent-blue);
+      background: rgba(56, 189, 248, 0.2);
+      color: var(--accent-blue);
+      font-weight: bold;
     }
 
     select, input[type="number"] {
       width: 100%;
-      padding: 12px;
-      background-color: var(--bg-input);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
       color: var(--text-main);
-      font-size: 0.95rem;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 14px;
       outline: none;
     }
 
-    select:focus, input:focus {
-      border-color: var(--accent-blue);
-    }
-
-    /* 온도 슬라이더 */
-    .temp-control {
+    .nav-btns {
       display: flex;
-      align-items: center;
-      gap: 15px;
+      gap: 10px;
+      margin-top: 15px;
+      padding-top: 10px;
     }
 
-    input[type="range"] {
+    .btn-primary {
       flex: 1;
-      accent-color: var(--accent-blue);
-    }
-
-    .temp-val {
-      font-weight: bold;
-      color: var(--accent-blue);
-      font-size: 1.1rem;
-      min-width: 45px;
-    }
-
-    /* 버튼 */
-    .btn {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, #0284c7, #2563eb);
-      color: white;
+      background: var(--accent-blue);
+      color: #0f172a;
       border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 700;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: bold;
       cursor: pointer;
-      transition: transform 0.1s, opacity 0.2s;
-    }
-
-    .btn:active {
-      transform: scale(0.98);
     }
 
     .btn-secondary {
-      background: var(--bg-input);
-      color: var(--text-sub);
-      margin-top: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      border: none;
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
     }
 
-    /* 교실 시각화 */
+    /* 3. 결과 화면 */
     .classroom-map {
-      position: relative;
-      background: #0f172a;
-      border: 2px dashed var(--border-color);
-      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
       padding: 16px;
-      margin-top: 10px;
+      margin-bottom: 20px;
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
 
-    .blackboard {
-      background: #064e3b;
+    .board {
+      background: #1e3a29;
       color: #a7f3d0;
       text-align: center;
       padding: 8px;
       border-radius: 6px;
-      font-size: 0.85rem;
+      font-size: 13px;
       font-weight: bold;
-      border: 1px solid #047857;
+      border: 1px solid #065f46;
     }
 
-    .aircon-unit {
-      background: rgba(56, 189, 248, 0.15);
-      border: 1px solid var(--accent-blue);
+    .ac-indicator {
+      background: rgba(56, 189, 248, 0.2);
+      border: 1px dashed var(--accent-blue);
       color: var(--accent-blue);
       text-align: center;
       padding: 6px;
       border-radius: 6px;
-      font-size: 0.8rem;
+      font-size: 12px;
       font-weight: bold;
     }
 
-    .seating-grid {
+    .desk-grid {
       display: grid;
       gap: 8px;
       margin: 10px 0;
-      overflow-x: auto;
     }
 
-    .seat {
-      aspect-ratio: 1;
+    .desk-cell {
+      aspect-ratio: 1.2;
       border-radius: 8px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 0.75rem;
+      font-size: 11px;
       font-weight: bold;
       cursor: pointer;
-      padding: 4px;
+      transition: transform 0.1s;
+      padding: 2px;
       text-align: center;
-      transition: transform 0.2s;
     }
 
-    .seat:hover {
-      transform: scale(1.05);
+    .desk-cell:active {
+      transform: scale(0.95);
     }
 
-    /* 자리 온도 레벨 색상 */
-    .seat-best { background-color: #15803d; color: #f0fdf4; border: 1px solid #22c55e; }
-    .seat-cool { background-color: #0369a1; color: #f0f9ff; border: 1px solid #38bdf8; }
-    .seat-cold { background-color: #1e1b4b; color: #a5b4fc; border: 1px solid #6366f1; }
-    .seat-warm { background-color: #854d0e; color: #fefce8; border: 1px solid #eab308; }
-    .seat-hot { background-color: #991b1b; color: #fef2f2; border: 1px solid #ef4444; }
+    .desk-best { background: rgba(74, 222, 128, 0.25); border: 1.5px solid var(--accent-green); color: var(--accent-green); }
+    .desk-cold { background: rgba(56, 189, 248, 0.25); border: 1.5px solid var(--accent-blue); color: var(--accent-blue); }
+    .desk-hot { background: rgba(248, 113, 113, 0.25); border: 1.5px solid var(--accent-red); color: var(--accent-red); }
+    .desk-warm { background: rgba(250, 204, 21, 0.25); border: 1.5px solid var(--accent-yellow); color: var(--accent-yellow); }
 
-    /* 범례 */
-    .legend {
+    .legend-box {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 8px;
-      font-size: 0.75rem;
-      margin-top: 10px;
+      font-size: 12px;
+      margin-bottom: 20px;
     }
 
     .legend-item {
@@ -312,17 +280,268 @@
       gap: 6px;
     }
 
-    .color-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 3px;
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
     }
 
-    /* 모달 */
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background:
+    .modal-overlay {
+      display: none;
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: #1e293b;
+      border: 1px solid var(--bg-card-border);
+      border-radius: 16px;
+      padding: 20px;
+      width: 100%;
+      max-width: 320px;
+      text-align: center;
+    }
+
+    .modal-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+    .modal-desc { font-size: 14px; color: var(--text-sub); margin-bottom: 20px; line-height: 1.4; }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- 1. 스플래시 화면 -->
+    <div class="screen active" id="screen-splash" onclick="goToSetup()">
+      <div class="splash-icon">
+        <i class="fa-solid fa-snowflake"></i>
+      </div>
+      <div class="splash-title">찾았다! 에어컨 명당</div>
+      <div class="splash-subtitle">우리 반 최고의 쾌적한 자리를 찾아보세요</div>
+      <div class="touch-prompt">화면 아무 곳이나 터치하여 시작</div>
+    </div>
+
+    <!-- 2. 환경 설정 화면 -->
+    <div class="screen" id="screen-setup">
+      <div class="section-title"><i class="fa-solid fa-sliders"></i> 교실 및 에어컨 설정</div>
+
+      <div class="form-group">
+        <label class="form-label">가로 줄 수 (열)</label>
+        <input type="number" id="input-cols" value="4" min="2" max="8">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">세로 줄 수 (행)</label>
+        <input type="number" id="input-rows" value="5" min="2" max="8">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">책상 배치 방식</label>
+        <div class="input-grid">
+          <button class="btn-option active" id="btn-pair-single" onclick="setPair(false)">1인석 (독서실형)</button>
+          <button class="btn-option" id="btn-pair-double" onclick="setPair(true)">2인석 (짝꿍형)</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">창문 위치</label>
+        <div class="input-grid">
+          <button class="btn-option active" id="btn-win-left" onclick="setWindow('left')">왼쪽</button>
+          <button class="btn-option" id="btn-win-right" onclick="setWindow('right')">오른쪽</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">에어컨 종류 / 위치</label>
+        <select id="select-ac-type">
+          <option value="ceiling-center">천장형 (교실 중앙)</option>
+          <option value="ceiling-front">천장형 (교실 앞쪽)</option>
+          <option value="stand-front-left">스탠드형 (앞쪽 좌측 구석)</option>
+          <option value="stand-front-right">스탠드형 (앞쪽 우측 구석)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">에어컨 설정 온도 (°C)</label>
+        <select id="select-ac-temp">
+          <option value="18">18°C ~ 20°C (강한 냉방)</option>
+          <option value="22" selected>21°C ~ 23°C (적정 냉방)</option>
+          <option value="25">24°C ~ 26°C (약한 냉방)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">바람 세기 (풍량)</label>
+        <div class="input-grid">
+          <button class="btn-option" onclick="setWind('weak', this)">약함</button>
+          <button class="btn-option active" onclick="setWind('medium', this)">보통</button>
+          <button class="btn-option" onclick="setWind('strong', this)" style="grid-column: span 2;">강함 (뒤쪽 줄까지 직풍)</button>
+        </div>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn-primary" onclick="generateResult()">명당자리 분석하기 <i class="fa-solid fa-wand-magic-sparkles"></i></button>
+      </div>
+    </div>
+
+    <!-- 3. 결과 화면 -->
+    <div class="screen" id="screen-result">
+      <div class="section-title" style="margin-bottom: 12px; color: var(--text-main);">
+        <i class="fa-solid fa-crown" style="color: var(--accent-yellow);"></i> 우리 반 에어컨 명당 지도
+      </div>
+
+      <div class="classroom-map">
+        <div class="board">칠 판 (교실 앞)</div>
+        <div class="ac-indicator" id="ac-position-display">🌀 천장형 에어컨 (중앙)</div>
+        <div class="desk-grid" id="desk-grid"></div>
+      </div>
+
+      <div class="legend-box">
+        <div class="legend-item"><div class="legend-dot" style="background: var(--accent-green);"></div> 초록: 명당 (쾌적)</div>
+        <div class="legend-item"><div class="legend-dot" style="background: var(--accent-blue);"></div> 파랑: 직풍 (추움)</div>
+        <div class="legend-item"><div class="legend-dot" style="background: var(--accent-yellow);"></div> 노랑: 바람 약함</div>
+        <div class="legend-item"><div class="legend-dot" style="background: var(--accent-red);"></div> 빨강: 더움 (햇빛/사각지대)</div>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn-secondary" onclick="goToSetup()"><i class="fa-solid fa-rotate-left"></i> 다시 설정하기</button>
+      </div>
+    </div>
+
+    <!-- 팝업 모달 -->
+    <div class="modal-overlay" id="modal">
+      <div class="modal-card">
+        <div class="modal-title" id="modal-seat-name">3행 2열 자리</div>
+        <div class="modal-desc" id="modal-seat-desc">설명 내용이 표시됩니다.</div>
+        <button class="btn-primary" style="width: 100%;" onclick="closeModal()">확인</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const config = {
+      rows: 5,
+      cols: 4,
+      isPair: false,
+      windowPos: 'left',
+      acType: 'ceiling-center',
+      acTemp: 22,
+      windSpeed: 'medium'
+    };
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    function goToSetup() {
+      showScreen('screen-setup');
+    }
+
+    function setPair(val) {
+      config.isPair = val;
+      document.getElementById('btn-pair-single').classList.toggle('active', !val);
+      document.getElementById('btn-pair-double').classList.toggle('active', val);
+    }
+
+    function setWindow(pos) {
+      config.windowPos = pos;
+      document.getElementById('btn-win-left').classList.toggle('active', pos === 'left');
+      document.getElementById('btn-win-right').classList.toggle('active', pos === 'right');
+    }
+
+    function setWind(speed, btn) {
+      config.windSpeed = speed;
+      btn.parentElement.querySelectorAll('.btn-option').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function generateResult() {
+      config.cols = parseInt(document.getElementById('input-cols').value) || 4;
+      config.rows = parseInt(document.getElementById('input-rows').value) || 5;
+      config.acType = document.getElementById('select-ac-type').value;
+      config.acTemp = parseInt(document.getElementById('select-ac-temp').value);
+      
+      const grid = document.getElementById('desk-grid');
+      grid.innerHTML = '';
+      grid.style.gridTemplateColumns = `repeat(${config.cols}, 1fr)`;
+
+      const acDisplay = document.getElementById('ac-position-display');
+      const acMap = {
+        'ceiling-center': '🌀 천장형 에어컨 (교실 중앙)',
+        'ceiling-front': '🌀 천장형 에어컨 (교실 앞쪽)',
+        'stand-front-left': '🧊 스탠드 에어컨 (앞쪽 좌측 구석)',
+        'stand-front-right': '🧊 스탠드 에어컨 (앞쪽 우측 구석)'
+      };
+      acDisplay.innerText = acMap[config.acType];
+
+      for (let r = 1; r <= config.rows; r++) {
+        for (let c = 1; c <= config.cols; c++) {
+          const seat = createSeatElement(r, c);
+          grid.appendChild(seat);
+        }
+      }
+
+      showScreen('screen-result');
+    }
+
+    function createSeatElement(r, c) {
+      const el = document.createElement('div');
+      el.className = 'desk-cell';
+
+      let score = 'best'; 
+      let label = '명당';
+      let desc = '바람이 은은하게 퍼져 적당하고 쾌적합니다.';
+
+      if (config.acType === 'ceiling-center') {
+        if (r === 2 || (config.windSpeed === 'strong' && r === 3)) {
+          score = 'cold'; label = '추움'; desc = '에어컨 바람이 바로 닿는 직풍 자리입니다. 겉옷을 준비하세요.';
+        } else if (r === 1) {
+          score = 'warm'; label = '바람 안 옴'; desc = '에어컨 바로 아래라 바람이 머리 위로 지나갑니다.';
+        } else if (r === config.rows) {
+          score = 'cold'; label = '냉기 누적'; desc = '차가운 공기는 아래로 깔려 맨 뒷줄은 다리가 시릴 수 있습니다.';
+        }
+      } else {
+        if (r === 1 || r === 2) {
+          score = 'cold'; label = '추움'; desc = '에어컨과 가까워 매우 시원하거나 춥습니다.';
+        } else if (r >= config.rows - 1) {
+          score = 'warm'; label = '약간 더움'; desc = '에어컨과의 거리가 멀어 바람이 약하게 도달합니다.';
+        }
+      }
+
+      const isWindowSide = (config.windowPos === 'left' && c === 1) || (config.windowPos === 'right' && c === config.cols);
+      if (isWindowSide && score !== 'cold') {
+        score = 'hot'; label = '더움'; desc = '창가 직사광선 복사열 때문에 에어컨 바람이 와도 덥습니다.';
+      }
+
+      const colorMap = {
+        'best': 'desk-best',
+        'cold': 'desk-cold',
+        'warm': 'desk-warm',
+        'hot': 'desk-hot'
+      };
+
+      el.classList.add(colorMap[score]);
+      el.innerHTML = `${r}-${c}<br>${label}`;
+
+      el.onclick = () => {
+        document.getElementById('modal-seat-name').innerText = `${r}행 ${c}열 자리 (${label})`;
+        document.getElementById('modal-seat-desc').innerText = desc;
+        document.getElementById('modal').style.display = 'flex';
+      };
+
+      return el;
+    }
+
+    function closeModal() {
+      document.getElementById('modal').style.display = 'none';
+    }
+  </script>
+</body>
+</html> 
